@@ -1,11 +1,34 @@
 const express = require("express");
 
-const UserController = require("../../controllers/user");
+const validateBody = require("../../middlewares/validateBody");
+const { userSchemas } = require("../../models/user");
+const { listUser } = require("../../controllers/user/listUser");
+const { updateUser } = require("../../controllers/user/updateUser");
+const { updateUserGoal } = require("../../controllers/user/updateUserGoal");
+const { updateUserWeight } = require("../../controllers/user/userUpdateWeight");
 
-const upload = require("../../middlewares/upload");
-
+const jsonParser = express.json();
 const router = express.Router();
 
-router.patch("/avatar", upload.single("avatar"),  UserController.uploadAvatar);
+router.get("/current", listUser);
+router.put(
+  "/update",
+  jsonParser,
+  validateBody(userSchemas.userUpdateFiveKeys),
+  updateUser
+);
+router.put(
+  "/goal",
+  jsonParser,
+  validateBody(userSchemas.userUpdateGoal),
+  updateUserGoal
+);
+router.post(
+  "/weight",
+  jsonParser,
+  validateBody(userSchemas.userUpdateWeight),
+  updateUserWeight
+);
 
-module.exports = { avatarRouter: router };
+
+module.exports = router;

@@ -1,14 +1,13 @@
+require("dotenv").config();
 const express = require("express");
 const logger = require("morgan");
 const cors = require("cors");
 
-const auth = require("./middlewares/auth");
-
-const { authRouter } = require("./routes/api/auth");
-const { contactsRouter } = require("./routes/api/contacts");
-const { avatarRouter } = require("./routes/api/user");
-
-const errorHandler = require("./middlewares/errorHandler");
+const authRouter = require("./routes/api/auth");
+const userRouter = require("./routes/api/user");
+const waterRouter = require("./routes/api/water");
+const caloriesRouter = require("./routes/api/calories");
+const recommendedFood = require("./routes/api/recommendedFood");
 
 const app = express();
 
@@ -16,15 +15,21 @@ const formatsLogger = app.get("env") === "development" ? "dev" : "short";
 
 app.use(logger(formatsLogger));
 app.use(cors());
+app.use(express.json());
 
-app.use("/user", authRouter);
-app.use("/api/contacts", auth, contactsRouter);
-app.use("/user", auth, avatarRouter);
-
-app.use(errorHandler);
+app.use("/api/auth", authRouter);
+app.use("/api/user", userRouter);
+app.use("/api/user", waterRouter);
+app.use("/api/user", caloriesRouter);
+app.use("/api", recommendedFood);
 
 app.use((req, res) => {
-  res.status(404).json({ message: "Not  found Way" });
+  res.status(404).json({ message: "Not found" });
+});
+
+app.use((err, req, res, next) => {
+  const { status = 500, message = "Server error" } = err;
+  res.status(status).json({ message });
 });
 
 module.exports = app;

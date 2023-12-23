@@ -1,24 +1,23 @@
 const express = require("express");
 
-const {
-  registerAuthController,
-  loginAuthController,
-  logoutAuthController,
-  currentAuthController,
-  verifyAuthController,
-  reVerifyAuthController,
-} = require("../../controllers/authController");
+const { validateBody, authenticate } = require("../../middlewares");
 
-const auth = require("../../middlewares/auth");
+const { userSchemas } = require("../../models/user");
+
+const ctrl = require("../../controllers/auth");
 
 const router = express.Router();
-const jsonParser = express.json();
 
-router.post("/register", jsonParser, registerAuthController);
-router.post("/login", jsonParser, loginAuthController);
-router.get("/logout", auth, logoutAuthController);
-router.get("/current", auth, currentAuthController);
-router.get("/verify/:token", verifyAuthController);
-router.post("/verify", jsonParser, reVerifyAuthController);
+router.post("/signup", validateBody(userSchemas.signupSchema), ctrl.signup);
 
-module.exports = { authRouter: router };
+router.get("/verify/:verificationToken", ctrl.verify);
+
+router.post("/verify", ctrl.resVerifyEmail);
+
+router.post("/signin", validateBody(userSchemas.signinSchema), ctrl.signin);
+
+router.post("/signout", authenticate, ctrl.signout);
+
+router.post("/forgot-password", ctrl.forgotPassword);
+
+module.exports = router;
